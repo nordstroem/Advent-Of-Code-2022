@@ -1,9 +1,10 @@
 import math
 from functools import reduce
 import re
+from typing import Callable, Any
 
 
-def read_lines(path, fun=lambda x: x):
+def read_lines(path, fun: Callable[[str], Any] = lambda x: x):
     with open(path, 'r') as inp:
         lines = inp.readlines()
         return [fun(l.strip()) for l in lines]
