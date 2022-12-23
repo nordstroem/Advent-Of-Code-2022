@@ -2,6 +2,8 @@ import math
 from functools import reduce
 import re
 from typing import Callable, Any
+import numpy as np
+import numpy.typing as npt
 
 
 def read_lines(path, fun: Callable[[str], Any] = lambda x: x):
@@ -43,3 +45,11 @@ def xgcd(a, b):
 
 def extract_ints(string):
     return list(map(int, re.findall(r"-?\d+", string)))
+
+
+def to_numpy_grid(blob) -> npt.NDArray:
+    lines = blob.split("\n")
+    max_cols = len(max(lines, key=lambda l: len(l)))
+    rows = list(map(lambda l: split(l.ljust(max_cols)), lines))
+    grid = np.array(rows)
+    return grid
