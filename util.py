@@ -1,9 +1,11 @@
 import math
 from functools import reduce
 import re
-from typing import Callable, Any
+from typing import Callable, Any, List
 import numpy as np
 import numpy.typing as npt
+import heapq
+from collections import defaultdict
 
 
 def read_lines(path, fun: Callable[[str], Any] = lambda x: x):
@@ -53,3 +55,55 @@ def to_numpy_grid(blob) -> npt.NDArray:
     rows = list(map(lambda l: split(l.ljust(max_cols)), lines))
     grid = np.array(rows)
     return grid
+
+
+class ScoreWrapper:
+    def __init__(self, score, value):
+        self.score = score
+        self.value = value
+
+    def __lt__(self, other):
+        return self.score < other.score
+
+    def __eq__(self, other):
+        return self.score == other.score
+
+
+def a_star(start: Any, goal_func: Callable[[Any], bool], heuristic_func: Callable[[Any], float], neighbors_func: Callable[[Any], List[Any]]):
+    open_set = []
+    heapq.heappush(open_set, ScoreWrapper(0, start))
+
+    came_from = {}
+
+    g_scores = defaultdict(lambda: math.inf)
+    g_scores[start] = 0
+
+    f_scores = defaultdict(lambda: math.inf)
+    f_scores[start] = heuristic_func(start)
+
+    visited = set()
+
+    while open_set:
+        score_wrap = heapq.heappop(open_set)
+        current = score_wrap.value
+        visited.add(current)
+
+        if goal_func(current):
+            shortest_path = [current]
+            while current in came_from.keys():
+                current = came_from[current]
+                shortest_path.insert(0, current)
+            return shortest_path
+
+        for neighbor, d in neighbors_func(current):
+            tentative_g_score = g_scores[current] + d
+            tentative_f_score = g_scores[current] + d + heuristic_func(neighbor)
+
+            if tentative_g_score < g_scores[neighbor]:
+                came_from[neighbor] = current
+                g_scores[neighbor] = tentative_g_score
+                f_scores[neighbor] = tentative_f_score
+                if neighbor not in visited:
+                    heapq.heappush(open_set, ScoreWrapper(tentative_f_score, neighbor))
+
+    return []
