@@ -6,6 +6,7 @@ import numpy as np
 import numpy.typing as npt
 import heapq
 from collections import defaultdict
+from dataclasses import dataclass
 
 
 def read_lines(path, fun: Callable[[str], Any] = lambda x: x):
@@ -57,21 +58,10 @@ def to_numpy_grid(blob) -> npt.NDArray:
     return grid
 
 
-class ScoreWrapper:
-    def __init__(self, score, value):
-        self.score = score
-        self.value = value
-
-    def __lt__(self, other):
-        return self.score < other.score
-
-    def __eq__(self, other):
-        return self.score == other.score
-
-
 def a_star(start: Any, goal_func: Callable[[Any], bool], heuristic_func: Callable[[Any], float], neighbors_func: Callable[[Any], List[Any]]):
     open_set = []
-    heapq.heappush(open_set, ScoreWrapper(0, start))
+    heapq.heappush(open_set, (0, 0, start))
+    items_added = 1
 
     came_from = {}
 
@@ -84,8 +74,7 @@ def a_star(start: Any, goal_func: Callable[[Any], bool], heuristic_func: Callabl
     visited = set()
 
     while open_set:
-        score_wrap = heapq.heappop(open_set)
-        current = score_wrap.value
+        _, _, current = heapq.heappop(open_set)
         visited.add(current)
 
         if goal_func(current):
@@ -104,6 +93,7 @@ def a_star(start: Any, goal_func: Callable[[Any], bool], heuristic_func: Callabl
                 g_scores[neighbor] = tentative_g_score
                 f_scores[neighbor] = tentative_f_score
                 if neighbor not in visited:
-                    heapq.heappush(open_set, ScoreWrapper(tentative_f_score, neighbor))
+                    heapq.heappush(open_set, (tentative_f_score, items_added, neighbor))
+                    items_added += 1
 
     return []

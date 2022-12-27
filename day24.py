@@ -1,13 +1,6 @@
 import util
-from dataclasses import dataclass
-from typing import Tuple, FrozenSet, NamedTuple
 from functools import partial, lru_cache
-import pickle
-import time
-import cProfile
-import pstats
-import math
-import io
+
 
 grid = util.read_file("inputs/day24.txt").strip()
 grid = util.to_numpy_grid(grid)
@@ -76,27 +69,7 @@ for r in range(ROWS):
 
 start = (START, frozenset(blizzards))
 neighbors_func = partial(neighbors, frozenset(walls))
-start_t = time.time()
-# pr = cProfile.Profile()
-# pr.enable()
 path = util.a_star(start, partial(goal, GOAL), partial(heuristic, GOAL), neighbors_func)
-print(len(path))
-# pr.disable()
-# result = io.StringIO()
-# pstats.Stats(pr, stream=result).print_stats()
-# result = result.getvalue()
-# with open('times.txt', 'w+') as f:
-#     f.write(result)
-#     f.close()
-
-print("Done with path1", time.time() - start_t)
-# with open("path1.pickle", "wb") as f:
-#     pickle.dump(path, f, protocol=pickle.HIGHEST_PROTOCOL)
-start_t = time.time()
 path2 = util.a_star(path[-1], partial(goal, START), partial(heuristic, START), neighbors_func)
-# # with open("path2.pickle", "wb") as f:
-# #     pickle.dump(path2, f, protocol=pickle.HIGHEST_PROTOCOL)
-print("Done with path2", time.time() - start_t)
 path3 = util.a_star(path2[-1], partial(goal, GOAL), partial(heuristic, GOAL), neighbors_func)
-
 print(len(path) + len(path2) + len(path3) - 3)
